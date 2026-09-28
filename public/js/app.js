@@ -128,7 +128,7 @@ function setupSocketListeners() {
   });
 }
 
-// 4. Message Rendering & Helper Functions
+// 4. Message Rendering & Helper Functions (Includes Self-Destruct Timer for VIP Messages)
 function appendMessage(msg) {
   if (!messagesList) return;
 
@@ -142,16 +142,46 @@ function appendMessage(msg) {
     deleteBtnHtml = `<button class="delete-btn" onclick="deleteMessage('${msg.id}')">🗑️</button>`;
   }
 
+  let vipBadge = '';
+  if (msg.isVip) {
+    vipBadge = `<span id="timer-${msg.id}" style="font-size: 11px; background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); padding: 2px 6px; border-radius: 10px; margin-left: 8px;">🔥 15s</span>`;
+  }
+
   msgDiv.innerHTML = `
-    <div class="msg-header">
-      <span class="msg-sender">${escapeHtml(msg.sender)}</span>
+    <div class="msg-header" style="display: flex; align-items: center; justify-content: space-between;">
+      <div>
+        <span class="msg-sender">${escapeHtml(msg.sender)}</span>
+        ${vipBadge}
+      </div>
       ${deleteBtnHtml}
     </div>
-    <div class="msg-text">${escapeHtml(msg.text)}</div>
+    <div class="msg-text" style="margin-top: 4px;">${escapeHtml(msg.text)}</div>
   `;
 
   messagesList.appendChild(msgDiv);
   messagesList.scrollTop = messagesList.scrollHeight;
+
+  // Start live countdown timer on client UI for VIP room messages
+  if (msg.isVip && msg.ttl) {
+    let secondsLeft = msg.ttl;
+    const timerElement = document.getElementById(`timer-${msg.id}`);
+    
+    const interval = setInterval(() => {
+      secondsLeft--;
+      if (timerElement) {
+        timerElement.innerText = `🔥 ${secondsLeft}s`;
+      }
+
+      if (secondsLeft <= 0) {
+        clearInterval(interval);
+        if (msgDiv) {
+          msgDiv.style.transition = 'opacity 0.5s ease';
+          msgDiv.style.opacity = '0';
+          setTimeout(() => msgDiv.remove(), 500);
+        }
+      }
+    }, 1000);
+  }
 }
 
 function deleteMessage(msgId) {

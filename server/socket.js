@@ -13,7 +13,7 @@ module.exports = function (io) {
         socket.username = userData.username;
         onlineUsers.set(socket.id, userData.username);
 
-        // Update DB if available
+        // Update DB online status if DB helper functions exist
         if (db.getUsers && db.saveUsers) {
           try {
             const users = db.getUsers();
@@ -26,7 +26,7 @@ module.exports = function (io) {
           }
         }
 
-        // Broadcast updated online users list to all clients
+        // Broadcast updated online users list to all connected clients
         io.emit('online_users_update', Array.from(new Set(onlineUsers.values())));
       }
     });
@@ -37,27 +37,56 @@ module.exports = function (io) {
       socket.join(room);
       socket.currentRoom = room;
 
-      // Send empty history so new joins don't see old messages
+      // Send empty history for fresh room joins
       socket.emit('room_history', []);
     });
 
-    // 3. Send Message
+    // 3. Send Message (Supports 15-Second Auto-Destruct in VIP Room)
     socket.on('send_message', (data) => {
+      const room = socket.currentRoom || 'General';
       const senderName = socket.username || (socket.user ? socket.user.username : 'Anonymous');
+      const isVipRoom = room.toLowerCase().includes('vip') || room.toLowerCase().includes('burn');
+      const messageId = Date.now().toString() + Math.random().toString(36).substring(2, 5);
+
       const messageData = {
-        id: Date.now().toString(),
+        id: messageId,
         sender: senderName,
         text: data.text,
-        room: socket.currentRoom || 'General',
+        room: room,
+        isVip: isVipRoom,
+        ttl: isVipRoom ? 15 : null, // 15 Seconds Time-To-Live
         timestamp: new Date().toISOString()
       };
 
-      io.to(socket.currentRoom || 'General').emit('new_message', messageData);
+      // Broadcast new message to everyone in the current room
+      io.to(room).emit('new_message', messageData);
+
+      // VIP Room Auto-Destruct Timer (Server / DB Cleanup after 15 Seconds)
+      if (isVipRoom) {
+        setTimeout(() => {
+          if (db.deleteMessage) {
+            try {
+              db.deleteMessage(messageId);
+            } catch (e) {
+              console.log('Error deleting message from DB:', e.message);
+            }
+          }
+          io.to(room).emit('message_deleted', { id: messageId });
+        }, 15000); // 15 seconds = 15000ms
+      }
     });
 
-    // 4. Delete Message (Real-Time for everyone in the room)
+    // 4. Delete Message (Manual deletion in real-time)
     socket.on('delete_message', (messageId) => {
-      io.to(socket.currentRoom || 'General').emit('message_deleted', { id: messageId });
+      const room = socket.currentRoom || 'General';
+      if (db.deleteMessage) {
+        try {
+          db.deleteMessage(messageId);
+        } catch (e) {
+          console.log('Error deleting message from DB:', e.message);
+        }
+      }
+      io.to(room).emit('message_deleted', { id: messageId });
     });
 
     // 5. Typing Indicator
