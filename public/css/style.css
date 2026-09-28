@@ -1,3 +1,6 @@
+/* ==========================================================================
+   1. Global Resets & Base Styles
+   ========================================================================== */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -18,19 +21,22 @@ body {
   display: none !important;
 }
 
-/* Auth Styles */
+/* ==========================================================================
+   2. Authentication Box
+   ========================================================================== */
 .auth-box {
   background: #1e293b;
   padding: 30px;
   border-radius: 12px;
   width: 320px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.auth-box input, .auth-box button {
+.auth-box input,
+.auth-box button {
   padding: 10px;
   border-radius: 6px;
   border: 1px solid #334155;
@@ -44,6 +50,11 @@ body {
   cursor: pointer;
   border: none;
   font-weight: bold;
+  transition: background 0.2s ease;
+}
+
+.auth-box button:hover {
+  background: #2563eb;
 }
 
 #toggle-auth {
@@ -53,7 +64,9 @@ body {
   text-align: center;
 }
 
-/* App Container Layout */
+/* ==========================================================================
+   3. Main App Layout & Sidebar
+   ========================================================================== */
 .chat-app {
   display: flex;
   width: 90vw;
@@ -62,10 +75,9 @@ body {
   background: #1e293b;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
 }
 
-/* Sidebar Styling */
 .sidebar {
   width: 280px;
   background: #0f172a;
@@ -95,9 +107,11 @@ body {
   border-radius: 8px;
   cursor: pointer;
   text-align: left;
+  transition: all 0.2s ease;
 }
 
-.room-btn.active {
+.room-btn.active,
+.room-btn:hover {
   background: #0284c7;
   border-color: #38bdf8;
 }
@@ -117,9 +131,16 @@ body {
   border-radius: 8px;
   cursor: pointer;
   font-weight: bold;
+  transition: background 0.2s ease;
 }
 
-/* Main Chat Section */
+.logout-btn:hover {
+  background: #e11d48;
+}
+
+/* ==========================================================================
+   4. Chat Main Container & Messages
+   ========================================================================== */
 .chat-main {
   flex: 1;
   display: flex;
@@ -142,14 +163,16 @@ body {
   gap: 12px;
 }
 
-/* Message Formatting */
+/* Consolidated Message Bubble */
 .message {
-  max-width: 65%;
+  max-width: 70%;
   padding: 10px 14px;
   border-radius: 10px;
   background: #334155;
+  color: #ffffff;
   align-self: flex-start;
   word-wrap: break-word;
+  position: relative;
 }
 
 .message.self {
@@ -157,11 +180,34 @@ body {
   align-self: flex-end;
 }
 
+.msg-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8em;
+  opacity: 0.85;
+  margin-bottom: 4px;
+}
+
 .sender {
   font-size: 11px;
   color: #cbd5e1;
-  margin-bottom: 3px;
   font-weight: bold;
+}
+
+.delete-btn {
+  background: none;
+  border: none;
+  color: #f87171;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0 4px;
+  margin-left: 8px;
+  transition: color 0.2s ease;
+}
+
+.delete-btn:hover {
+  color: #ef4444;
 }
 
 .timer-badge {
@@ -170,7 +216,9 @@ body {
   margin-top: 5px;
 }
 
-/* Message Input Form */
+/* ==========================================================================
+   5. Message Input Form
+   ========================================================================== */
 .message-form {
   display: flex;
   padding: 15px;
@@ -197,4 +245,9 @@ body {
   border-radius: 8px;
   cursor: pointer;
   font-weight: bold;
+  transition: background 0.2s ease;
+}
+
+.message-form button:hover {
+  background: #0369a1;
 }

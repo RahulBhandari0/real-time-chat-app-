@@ -1,78 +1,69 @@
-const jwt = require('jsonwebtoken');
-const { getMessagesByRoom, saveMessage, deleteMessage } = require('./db');
+const db = require('./db');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'secretkey';
-let onlineUsers = new Map(); // socket.id -> username
-
-function initSocket(io) {
-  io.use((socket, next) => {
-    const token = socket.handshake.auth.token;
-    if (!token) return next(new Error('Authentication error'));
-    
-    jwt.verify(token, JWT_SECRET, (err, decoded) => {
-      if (err) return next(new Error('Authentication error'));
-      socket.user = decoded;
-      next();
-    });
-  });
-
+module.exports = function (io) {
   io.on('connection', (socket) => {
-    onlineUsers.set(socket.id, socket.user.username);
-    
-    // Broadcast active user list
-    const getUniqueUsers = () => Array.from(new Set(onlineUsers.values()));
-    io.emit('onlineUsersList', getUniqueUsers());
+    let currentUser = null;
 
-    // Join Room (General, VIP, or Private DM Room)
-    socket.on('joinRoom', (room) => {
-      socket.rooms.forEach(r => {
-        if (r !== socket.id) socket.leave(r);
-      });
-      socket.join(room);
+    socket.on('authenticate', (userData) => {
+      currentUser = userData;
+      socket.user = userData;
       
-      const messages = getMessagesByRoom(room);
-      socket.emit('roomHistory', messages);
+      // Save/Update user online status
+      const users = db.getUsers();
+      if (users[userData.username]) {
+        users[userData.username].online = true;
+        db.saveUsers(users);
+      }
+
+      io.emit('user_status_change', { username: userData.username, online: true });
     });
 
-    // Send Message (Group Rooms & Direct Messages)
-    socket.on('sendMessage', ({ room, text }) => {
-      const isVIP = room === 'VIP';
-      const expiresAt = isVIP ? Date.now() + 15000 : null;
+    socket.on('join_room', (room) => {
+      socket.leaveAll();
+      socket.join(room);
+      socket.currentRoom = room;
 
-      const message = {
+      // New users ko purane messages NA dikhane ke liye:
+      // Hum naye join hone wale ko empty history ya zero messages send karenge.
+      socket.emit('room_history', []);
+    });
+
+    socket.on('send_message', (data) => {
+      const messageData = {
         id: Date.now().toString(),
-        room,
-        sender: socket.user.username,
-        text,
-        timestamp: Date.now(),
-        expiresAt
+        sender: socket.user ? socket.user.username : 'Anonymous',
+        text: data.text,
+        room: socket.currentRoom || 'General',
+        timestamp: new Date().toISOString()
       };
 
-      saveMessage(message);
-      io.to(room).emit('newMessage', message);
+      // Broadcast message to everyone in the room
+      io.to(socket.currentRoom || 'General').emit('new_message', messageData);
+    });
 
-      if (isVIP) {
-        setTimeout(() => {
-          deleteMessage(message.id);
-          io.to(room).emit('messageDeleted', message.id);
-        }, 15000);
+    socket.on('delete_message', (messageId) => {
+      // Broadcast delete event to everyone in the room
+      io.to(socket.currentRoom || 'General').emit('message_deleted', { id: messageId });
+    });
+
+    socket.on('typing', (isTyping) => {
+      if (socket.currentRoom && socket.user) {
+        socket.to(socket.currentRoom).emit('user_typing', {
+          username: socket.user.username,
+          isTyping: isTyping
+        });
       }
     });
 
-    // Typing Indicator Events
-    socket.on('typing', ({ room }) => {
-      socket.to(room).emit('userTyping', { username: socket.user.username, room });
-    });
-
-    socket.on('stopTyping', ({ room }) => {
-      socket.to(room).emit('userStopTyping', { username: socket.user.username, room });
-    });
-
     socket.on('disconnect', () => {
-      onlineUsers.delete(socket.id);
-      io.emit('onlineUsersList', getUniqueUsers());
+      if (currentUser) {
+        const users = db.getUsers();
+        if (users[currentUser.username]) {
+          users[currentUser.username].online = false;
+          db.saveUsers(users);
+        }
+        io.emit('user_status_change', { username: currentUser.username, online: false });
+      }
     });
   });
-}
-
-module.exports = initSocket;
+};
