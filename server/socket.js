@@ -1,69 +1,94 @@
 const db = require('./db');
 
+// Online users map: socket.id -> username
+const onlineUsers = new Map();
+
 module.exports = function (io) {
   io.on('connection', (socket) => {
-    let currentUser = null;
 
+    // 1. Authenticate User & Broadcast Online List
     socket.on('authenticate', (userData) => {
-      currentUser = userData;
-      socket.user = userData;
-      
-      // Save/Update user online status
-      const users = db.getUsers();
-      if (users[userData.username]) {
-        users[userData.username].online = true;
-        db.saveUsers(users);
-      }
+      if (userData && userData.username) {
+        socket.user = userData;
+        socket.username = userData.username;
+        onlineUsers.set(socket.id, userData.username);
 
-      io.emit('user_status_change', { username: userData.username, online: true });
+        // Update DB if available
+        if (db.getUsers && db.saveUsers) {
+          try {
+            const users = db.getUsers();
+            if (users && users[userData.username]) {
+              users[userData.username].online = true;
+              db.saveUsers(users);
+            }
+          } catch (e) {
+            console.log('DB online status update skipped:', e.message);
+          }
+        }
+
+        // Broadcast updated online users list to all clients
+        io.emit('online_users_update', Array.from(new Set(onlineUsers.values())));
+      }
     });
 
+    // 2. Join Room (New users get empty history)
     socket.on('join_room', (room) => {
       socket.leaveAll();
       socket.join(room);
       socket.currentRoom = room;
 
-      // New users ko purane messages NA dikhane ke liye:
-      // Hum naye join hone wale ko empty history ya zero messages send karenge.
+      // Send empty history so new joins don't see old messages
       socket.emit('room_history', []);
     });
 
+    // 3. Send Message
     socket.on('send_message', (data) => {
+      const senderName = socket.username || (socket.user ? socket.user.username : 'Anonymous');
       const messageData = {
         id: Date.now().toString(),
-        sender: socket.user ? socket.user.username : 'Anonymous',
+        sender: senderName,
         text: data.text,
         room: socket.currentRoom || 'General',
         timestamp: new Date().toISOString()
       };
 
-      // Broadcast message to everyone in the room
       io.to(socket.currentRoom || 'General').emit('new_message', messageData);
     });
 
+    // 4. Delete Message (Real-Time for everyone in the room)
     socket.on('delete_message', (messageId) => {
-      // Broadcast delete event to everyone in the room
       io.to(socket.currentRoom || 'General').emit('message_deleted', { id: messageId });
     });
 
+    // 5. Typing Indicator
     socket.on('typing', (isTyping) => {
-      if (socket.currentRoom && socket.user) {
+      if (socket.currentRoom && socket.username) {
         socket.to(socket.currentRoom).emit('user_typing', {
-          username: socket.user.username,
+          username: socket.username,
           isTyping: isTyping
         });
       }
     });
 
+    // 6. Disconnect Handler
     socket.on('disconnect', () => {
-      if (currentUser) {
-        const users = db.getUsers();
-        if (users[currentUser.username]) {
-          users[currentUser.username].online = false;
-          db.saveUsers(users);
+      if (socket.id) {
+        onlineUsers.delete(socket.id);
+        io.emit('online_users_update', Array.from(new Set(onlineUsers.values())));
+      }
+
+      if (socket.username && db.getUsers && db.saveUsers) {
+        try {
+          const users = db.getUsers();
+          if (users && users[socket.username]) {
+            users[socket.username].online = false;
+            db.saveUsers(users);
+          }
+        } catch (e) {
+          // ignore error
         }
-        io.emit('user_status_change', { username: currentUser.username, online: false });
       }
     });
+
   });
 };

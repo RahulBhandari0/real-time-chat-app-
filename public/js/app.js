@@ -24,8 +24,8 @@ const logoutBtn = document.getElementById('logout-btn');
 if (toggleAuth) {
   toggleAuth.addEventListener('click', () => {
     isLoginMode = !isLoginMode;
-    formTitle.innerText = isLoginMode ? 'Login to Chat' : 'Register Account';
-    authBtn.innerText = isLoginMode ? 'Login' : 'Register';
+    if (formTitle) formTitle.innerText = isLoginMode ? 'Login to Chat' : 'Register Account';
+    if (authBtn) authBtn.innerText = isLoginMode ? 'Login' : 'Register';
     toggleAuth.innerText = isLoginMode ? 'Need an account? Register' : 'Have an account? Login';
   });
 }
@@ -72,7 +72,7 @@ if (authForm) {
         socket.emit('join_room', currentRoom);
 
       } else {
-        alert(data.message || 'Authentication failed');
+        alert(data.message || data.error || 'Authentication failed');
       }
     } catch (err) {
       console.error('Auth error:', err);
@@ -85,8 +85,28 @@ if (authForm) {
 function setupSocketListeners() {
   if (!socket) return;
 
+  // Render Online Users List in Sidebar
+  socket.on('online_users_update', (users) => {
+    const onlineList = document.getElementById('online-users');
+    if (!onlineList) return;
+
+    onlineList.innerHTML = '';
+    users.forEach((username) => {
+      const li = document.createElement('li');
+      li.style.cssText = 'display: flex; align-items: center; margin-bottom: 8px; color: #cbd5e1; font-size: 14px;';
+      
+      const isYou = currentUser && username === currentUser.username;
+      li.innerHTML = `
+        <span style="height: 8px; width: 8px; background-color: #22c55e; border-radius: 50%; display: inline-block; margin-right: 8px;"></span>
+        <span>${escapeHtml(username)}</span>
+        ${isYou ? '<span style="color: #94a3b8; font-size: 12px; margin-left: 6px;">(You)</span>' : ''}
+      `;
+      onlineList.appendChild(li);
+    });
+  });
+
   socket.on('room_history', (messages) => {
-    messagesList.innerHTML = '';
+    if (messagesList) messagesList.innerHTML = '';
     messages.forEach(appendMessage);
   });
 
@@ -124,7 +144,7 @@ function appendMessage(msg) {
 
   msgDiv.innerHTML = `
     <div class="msg-header">
-      <span class="msg-sender">${msg.sender}</span>
+      <span class="msg-sender">${escapeHtml(msg.sender)}</span>
       ${deleteBtnHtml}
     </div>
     <div class="msg-text">${escapeHtml(msg.text)}</div>
@@ -141,6 +161,7 @@ function deleteMessage(msgId) {
 }
 
 function escapeHtml(text) {
+  if (!text) return '';
   const div = document.createElement('div');
   div.innerText = text;
   return div.innerHTML;
