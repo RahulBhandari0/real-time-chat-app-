@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Real-Time Chat</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+
+  <!-- Auth Container -->
+  <div id="auth-container" class="auth-box">
+    <h2 id="form-title">Login to Chat</h2>
+    <input type="text" id="username" placeholder="Username" required />
+    <input type="password" id="password" placeholder="Password" required />
+    <input type="email" id="email" placeholder="Email (Optional)" />
+    <input type="text" id="phone" placeholder="Phone (Optional)" />
+    <button id="auth-btn">Login</button>
+    <p id="toggle-auth">Need an account? Register</p>
+  </div>
+
+  <!-- Main Chat Interface -->
+  <div id="chat-container" class="chat-app hidden">
+    
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <h3>Chat Rooms</h3>
+        <button class="room-btn active" data-room="General">General</button>
+        <button class="room-btn" data-room="VIP">VIP 🔥 Burn After Reading</button>
+      </div>
+
+      <div class="sidebar-section">
+        <h3>Online Users</h3>
+        <ul id="online-users" class="online-list">
+          <!-- Dynamic Online Users & DM Links -->
+        </ul>
+      </div>
+
+      <button id="logout-btn" class="logout-btn">Logout</button>
+    </aside>
+
+    <!-- Chat Area -->
+    <main class="chat-main">
+      <header class="chat-header">
+        <h3 id="current-room-title">Room: General</h3>
+        <span id="typing-indicator" style="font-size: 12px; color: #38bdf8; margin-left: 10px; font-style: italic;"></span>
+      </header>
+
+      <div id="messages-list" class="messages-container"></div>
+
+      <form id="message-form" class="message-form">
+        <input type="text" id="message-input" placeholder="Type a message..." autocomplete="off" required />
+        <button type="submit">Send</button>
+      </form>
+    </main>
+
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

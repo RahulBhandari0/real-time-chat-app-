@@ -1,0 +1,164 @@
+{
+  "users": [
+    {
+      "id": "1790527809103",
+      "username": "rahul bhandari",
+      "password": "$2b$10$7VnoFPi0YS4cn.qDoqika.Zb.NBL757RFLzNcxpxqvQBU5iKMXgZy",
+      "email": null,
+      "phone": null
+    },
+    {
+      "id": "1790527825222",
+      "username": "Rahul bhandari",
+      "password": "$2b$10$qNEVl4e0n7BYjMJlTcyUduMK/JVv2sPm/p71zRTZzqDUZjsM1bnm.",
+      "email": null,
+      "phone": null
+    },
+    {
+      "id": "1790527989308",
+      "username": "Rahul Bhandari",
+      "password": "$2b$10$7e2tZ.wGU1CmPAFSM/Z/3e4svWYnObc9XzjQv7FhfJH34x8yJreCq",
+      "email": null,
+      "phone": null
+    },
+    {
+      "id": "1790528430559",
+      "username": "Rohit bhandari",
+      "password": "$2b$10$z8CBgAE7iimpDY6DIdiF.OxGGnc8e78oKlbKW.RAj/aRMPc7XDsxy",
+      "email": null,
+      "phone": null
+    },
+    {
+      "id": "1790528585822",
+      "username": "Rauu",
+      "password": "$2b$10$cAbNLwBeWN5YW8CwZ4SgsuVxAQ/fghdH07oFK9Z49MQlhFLRg550K",
+      "email": null,
+      "phone": null
+    },
+    {
+      "id": "1790577062685",
+      "username": "Rahul",
+      "password": "$2b$10$9RVHJPJXcO/WfsD1QBDMdeavqYOzyVHZBfhFB2W/rIeKmX1ynQYCu",
+      "email": "bhandarirahul198@gmail.com",
+      "phone": null
+    }
+  ],
+  "messages": [
+    {
+      "id": "1790576020064",
+      "room": "General",
+      "sender": "Rauu",
+      "senderId": "1790528585822",
+      "text": "hlo",
+      "createdAt": "2026-09-28T06:13:40.066Z",
+      "readBy": [],
+      "selfDestructAt": null
+    },
+    {
+      "id": "1790576055014",
+      "room": "VIP",
+      "sender": "Rauu",
+      "senderId": "1790528585822",
+      "text": "best time.",
+      "createdAt": "2026-09-28T06:14:15.014Z",
+      "readBy": [],
+      "selfDestructAt": null
+    },
+    {
+      "id": "1790578671406",
+      "room": "General",
+      "sender": "Rahul",
+      "text": "hi",
+      "timestamp": 1790578671406,
+      "expiresAt": null
+    },
+    {
+      "id": "1790578913358",
+      "room": "General",
+      "sender": "Rahul",
+      "text": "how are you",
+      "timestamp": 1790578913358,
+      "expiresAt": null
+    },
+    {
+      "id": "1790578937313",
+      "room": "General",
+      "sender": "Rauu",
+      "text": "all good",
+      "timestamp": 1790578937313,
+      "expiresAt": null
+    },
+    {
+      "id": "1790579378164",
+      "room": "General",
+      "sender": "Rahul",
+      "text": "ohk",
+      "timestamp": 1790579378164,
+      "expiresAt": null
+    },
+    {
+      "id": "1790579434175",
+      "room": "General",
+      "sender": "Rauu",
+      "text": "where are form??",
+      "timestamp": 1790579434175,
+      "expiresAt": null
+    },
+    {
+      "id": "1790579451366",
+      "room": "General",
+      "sender": "Rahul",
+      "text": "i am form Uk...",
+      "timestamp": 1790579451366,
+      "expiresAt": null
+    },
+    {
+      "id": "1790579643253",
+      "room": "General",
+      "sender": "Rauu",
+      "text": "nice",
+      "timestamp": 1790579643253,
+      "expiresAt": null
+    },
+    {
+      "id": "1790579652499",
+      "room": "General",
+      "sender": "Rahul",
+      "text": "age??",
+      "timestamp": 1790579652499,
+      "expiresAt": null
+    },
+    {
+      "id": "1790579666767",
+      "room": "General",
+      "sender": "Rauu",
+      "text": "20",
+      "timestamp": 1790579666767,
+      "expiresAt": null
+    },
+    {
+      "id": "1790579674846",
+      "room": "General",
+      "sender": "Rahul",
+      "text": "ohkk",
+      "timestamp": 1790579674846,
+      "expiresAt": null
+    },
+    {
+      "id": "1790579687019",
+      "room": "General",
+      "sender": "Rauu",
+      "text": "u??",
+      "timestamp": 1790579687019,
+      "expiresAt": null
+    },
+    {
+      "id": "1790579691646",
+      "room": "General",
+      "sender": "Rahul",
+      "text": "21",
+      "timestamp": 1790579691646,
+      "expiresAt": null
+    }
+  ]
+}
