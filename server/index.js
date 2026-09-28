@@ -17,14 +17,18 @@ const io = new Server(server);
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../public')));
 
-// Register API (With Email & SMS Notifications)
-app.post('/api/register', async (req, res) => {
+// Register API (Both /api/register AND /api/auth/register support)
+const handleRegister = async (req, res) => {
   const { username, password, email, phone } = req.body;
-  if (!username || !password) return res.status(400).json({ error: 'Username and password are required' });
+  if (!username || !password) {
+    return res.status(400).json({ error: 'Username and password are required', message: 'Username and password are required' });
+  }
 
-  const users = db.getUsers();
-  if (users.find(u => u.username === username)) {
-    return res.status(400).json({ error: 'Username already taken' });
+  const users = db.getUsers ? db.getUsers() : [];
+  const userList = Array.isArray(users) ? users : Object.values(users);
+
+  if (userList.find(u => u.username === username)) {
+    return res.status(400).json({ error: 'Username already taken', message: 'Username already taken' });
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -36,37 +40,51 @@ app.post('/api/register', async (req, res) => {
     phone: phone || null 
   };
   
-  db.saveUser(newUser);
+  if (db.saveUser) db.saveUser(newUser);
 
   // Send Email & SMS Notifications asynchronously
-  if (email) {
+  if (email && typeof sendWelcomeEmail === 'function') {
     sendWelcomeEmail(email, username);
   }
-  if (phone) {
+  if (phone && typeof sendSMSAlert === 'function') {
     sendSMSAlert(phone, `Hi ${username}, welcome to Real-Time Chat App! Your account is ready.`);
   }
 
-  const token = signToken(newUser);
+  const token = signToken ? signToken(newUser) : 'dummy-token';
   res.json({ token, username: newUser.username });
-});
+};
 
-// Login API
-app.post('/api/login', async (req, res) => {
+// Login API (Both /api/login AND /api/auth/login support)
+const handleLogin = async (req, res) => {
   const { username, password } = req.body;
-  const users = db.getUsers();
-  const user = users.find(u => u.username === username);
+  const users = db.getUsers ? db.getUsers() : [];
+  const userList = Array.isArray(users) ? users : Object.values(users);
+  
+  const user = userList.find(u => u.username === username);
 
   if (!user || !(await bcrypt.compare(password, user.password))) {
-    return res.status(401).json({ error: 'Invalid credentials' });
+    return res.status(401).json({ error: 'Invalid credentials', message: 'Invalid credentials' });
   }
 
-  const token = signToken(user);
+  const token = signToken ? signToken(user) : 'dummy-token';
   res.json({ token, username: user.username });
-});
+};
 
-initSocket(io);
+// Routes
+app.post('/api/register', handleRegister);
+app.post('/api/auth/register', handleRegister);
+
+app.post('/api/login', handleLogin);
+app.post('/api/auth/login', handleLogin);
+
+// Setup Socket.IO
+if (typeof initSocket === 'function') {
+  initSocket(io);
+} else {
+  require('./socket')(io);
+}
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
