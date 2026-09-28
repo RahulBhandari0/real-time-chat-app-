@@ -12,12 +12,14 @@
   <!-- Auth Container -->
   <div id="auth-container" class="auth-box">
     <h2 id="form-title">Login to Chat</h2>
-    <input type="text" id="username" placeholder="Username" required />
-    <input type="password" id="password" placeholder="Password" required />
-    <input type="email" id="email" placeholder="Email (Optional)" />
-    <input type="text" id="phone" placeholder="Phone (Optional)" />
-    <button id="auth-btn">Login</button>
-    <p id="toggle-auth">Need an account? Register</p>
+    <form id="auth-form">
+      <input type="text" id="username" placeholder="Username" required autocomplete="off" />
+      <input type="password" id="password" placeholder="Password" required />
+      <input type="email" id="email" placeholder="Email (Optional)" autocomplete="off" />
+      <input type="text" id="phone" placeholder="Phone (Optional)" autocomplete="off" />
+      <button type="submit" id="auth-btn">Login</button>
+    </form>
+    <p id="toggle-auth" style="cursor: pointer; margin-top: 10px;">Need an account? Register</p>
   </div>
 
   <!-- Main Chat Interface -->
@@ -51,7 +53,7 @@
       <div id="messages-list" class="messages-container"></div>
 
       <form id="message-form" class="message-form">
-        <input type="text" id="message-input" placeholder="Type a message..." autocomplete="off" required />
+        <input type="text" id="message-input" placeholder="Type a message..." autocomplete="off" />
         <button type="submit">Send</button>
       </form>
     </main>
