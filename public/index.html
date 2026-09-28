@@ -9,8 +9,8 @@
 </head>
 <body>
 
-  <!-- Auth Container -->
-  <div id="auth-container" class="auth-box">
+  <!-- Auth Container (Default Visible) -->
+  <div id="auth-container" class="auth-box" style="display: flex;">
     <h2 id="form-title">Login to Chat</h2>
     <form id="auth-form">
       <input type="text" id="username" placeholder="Username" required autocomplete="off" />
@@ -19,11 +19,11 @@
       <input type="text" id="phone" placeholder="Phone (Optional)" autocomplete="off" />
       <button type="submit" id="auth-btn">Login</button>
     </form>
-    <p id="toggle-auth" style="cursor: pointer; margin-top: 10px;">Need an account? Register</p>
+    <p id="toggle-auth" style="cursor: pointer; margin-top: 10px; color: #3b82f6;">Need an account? Register</p>
   </div>
 
-  <!-- Main Chat Interface -->
-  <div id="chat-container" class="chat-app hidden">
+  <!-- Main Chat Interface (Hidden initially) -->
+  <div id="chat-container" class="chat-app" style="display: none;">
     
     <!-- Sidebar -->
     <aside class="sidebar">
@@ -35,9 +35,7 @@
 
       <div class="sidebar-section">
         <h3>Online Users</h3>
-        <ul id="online-users" class="online-list">
-          <!-- Dynamic Online Users & DM Links -->
-        </ul>
+        <ul id="online-users" class="online-list"></ul>
       </div>
 
       <button id="logout-btn" class="logout-btn">Logout</button>
